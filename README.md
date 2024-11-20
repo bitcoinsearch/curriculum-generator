@@ -1,6 +1,6 @@
 # Curriculum Generator
 
-This is a Next.js project that generates a curriculum for a given bitcoin topic.
+This is a tool to generate a curriculum for a given bitcoin topic using the OpenAI API, and uur custom Bitcoin knowledge base.
 
 ## Getting Started
 

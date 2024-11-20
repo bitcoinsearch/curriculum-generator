@@ -1,0 +1,3 @@
+[submodule "topics-index"]
+	path = topics-index
+	url = https://github.com/bitcoinsearch/topics-index.git

@@ -1,7 +1,7 @@
 // src/pages/api/myRoute.ts
 
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { fetchData, handlePostRequest } from '../../lib/curriculumLogic';
+import { fetchData, handlePostRequest } from '@/lib/curriculumLogic';
 
 type ResponseData = {
     data: unknown;

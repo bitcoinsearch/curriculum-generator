@@ -9,7 +9,7 @@ type ResponseData = {
     message: string;
 };
 
-const size = 10;
+const size = 70;
 const from = 0;
 
 const FIELDS_TO_SEARCH = ["title", "summary"];
@@ -52,10 +52,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
                     ...baseQuery,
                 });
 
+                const resultData = result.hits.hits;
+
+                // return only the sources property
+                const sources = resultData.map((item: any) => item._source);
+
+                // select only the sources that has a summary property          
+                const sourcesWithSummary = sources.filter((item: any) => item.summary);
+
                 return res.status(200).json({
                     message: 'Success',
                     data: {
-                        result: result.hits.hits,
+                        result: sourcesWithSummary,
                     },
                 });
             } catch (error: any) {

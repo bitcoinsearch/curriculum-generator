@@ -1,7 +1,7 @@
 // src/pages/api/myRoute.ts
 
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { handlePostRequest } from '@/lib/curriculumLogic';
+import { topics, getTopic, getTopics } from '@/lib/curriculumLogic';
 import { client } from '@/config/elasticsearch';
 import { generateCompletion } from '@/lib/openai';
 
@@ -21,7 +21,7 @@ let baseQuery = {
         bool: {
             must: [{
                 multi_match: {
-                    query: 'Segwit',
+                    query: '',
                     fields: FIELDS_TO_SEARCH,
                     fuzziness: 0,
                     minimum_should_match: "90%",
@@ -43,14 +43,44 @@ let baseQuery = {
     },
 };
 
+
+function buildQuery(title: string): typeof baseQuery {
+    baseQuery.query.bool.must[0].multi_match.query = title;
+
+    return baseQuery;
+}
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse<ResponseData>) {
     switch (req.method) {
         case 'GET': {
             try {
+
+                if (topics.length === 0) {
+                    // if the topics are not loaded, load them
+                    await getTopics();
+                }
+
+                // get the topic title from the query
+                const topicTitle = req.query.topic as string;
+
+                // get the topic from the topics array
+                const topic = getTopic(topicTitle);
+
+                if (!topic) {
+                    // if the topic is not found, return a 404 error
+                    return res.status(404).json({
+                        message: 'Topic not found',
+                        data: null,
+                    });
+                }
+
+                // build the query
+                const query = buildQuery(topic.title);
+
                 // Call the search method
                 const result = await client.search({
                     index: process.env.INDEX,
-                    ...baseQuery,
+                    ...query,
                 });
 
                 const resultData = result.hits.hits;
@@ -104,8 +134,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
             }
         }
         case 'POST': {
-            const data = handlePostRequest(req.body);
-            res.status(200).json({ message: 'Post Successful', data });
+
+            res.status(200).json({ message: 'Post Successful', data: {} });
             break;
         }
     }

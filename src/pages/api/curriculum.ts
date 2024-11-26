@@ -10,7 +10,7 @@ type ResponseData = {
     message: string;
 };
 
-const size = 50;
+const size = 40;
 const from = 0;
 
 const FIELDS_TO_SEARCH = ["title", "summary"];
@@ -19,14 +19,16 @@ const FIELDS_TO_SEARCH = ["title", "summary"];
 let baseQuery = {
     query: {
         bool: {
-            must: [{
-                multi_match: {
-                    query: '',
-                    fields: FIELDS_TO_SEARCH,
-                    fuzziness: 0,
-                    minimum_should_match: "90%",
+            must: [
+                {
+                    multi_match: {
+                    },
                 },
-            }],
+                {
+                    bool: {
+                    },
+                }
+            ],
             must_not: [
                 {
                     term: {
@@ -44,10 +46,42 @@ let baseQuery = {
 };
 
 
-function buildQuery(title: string): typeof baseQuery {
-    baseQuery.query.bool.must[0].multi_match.query = title;
+function buildQuery(title: string, aliases: string[]): typeof baseQuery {
+    // create a should multi_match for each alias, using the FIELDS_TO_SEARCH
+    const shouldMatch = aliases.map((alias) => ({
+        multi_match: {
+            fields: FIELDS_TO_SEARCH,
+            query: alias,
+            fuzziness: 0,
+            minimum_should_match: "90%"
+        }
+    }));
 
-    return baseQuery;
+    return {
+        ...baseQuery,
+        query: {
+            ...baseQuery.query,
+            bool: {
+                ...baseQuery.query.bool,
+                must: [
+                    {
+                        multi_match: {
+                            query: title,
+                            fields: FIELDS_TO_SEARCH,
+                            fuzziness: 0,
+                            minimum_should_match: "90%"
+                        }
+                    },
+                    {
+                        bool: {
+                            should: shouldMatch
+                        }
+                    },
+                    ...baseQuery.query.bool.must.slice(1)
+                ]
+            }
+        }
+    };
 }
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse<ResponseData>) {
@@ -77,7 +111,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
                 }
 
                 // build the query
-                const query = buildQuery(topic.title);
+                const query = buildQuery(topic.title, topic.aliases ?? aiTopic?.aliases ?? []);
 
                 // Call the search method
                 const result = await client.search({

@@ -59,10 +59,11 @@ export async function generateCurriculum(data: any[]): Promise<any[]> {
         Categorize each topic into one of the four levels:
 
           - Introduction: Foundational topics for beginners.
-          - Simple: Straightforward topics that build on basic concepts.
-          - Medium: Intermediate topics requiring some prior knowledge.
-          - Hard: Advanced and technical topics.
-        
+          - Concepts: Topics that introduce a new concept or idea.
+          - Benefits: Topics that explain the benefits of a new concept or idea.
+          - Technical Aspects: Topics that explain the technical aspects of a new concept or idea.
+          - Security considerations: Topics that explain the security considerations of a new concept or idea.
+
           Provide a brief explanation for why each topic belongs to its assigned level.  Provide the output in JSON format with the fields: topic, category, and reason, Do not include any explanations or markdown formatting, only return valid JSON.
         `;
         // Call OpenAI API to create a completion
@@ -84,7 +85,12 @@ export async function generateCurriculum(data: any[]): Promise<any[]> {
         }
 
         // Preprocess the response to remove markdown formatting
-        const sanitizedResponse = completionText.replace(/```json|```/g, "").trim();
+        let sanitizedResponse = completionText.replace(/```json|```/g, "").trim();
+
+        // Escape problematic characters
+        sanitizedResponse = sanitizedResponse.replace(/\\n/g, " "); // Replace newline characters
+        sanitizedResponse = sanitizedResponse.replace(/\\'/g, "'"); // Fix single quotes
+        sanitizedResponse = sanitizedResponse.replace(/\\"/g, '"'); // Fix escaped double quotes
 
         // Parse the JSON response
         const categorizedTopics = JSON.parse(sanitizedResponse);

@@ -1,16 +1,27 @@
 // src/lib/myRouteLogic.ts
 
-export type MyData = {
-    id: number;
-    name: string;
-};
-
-
-export function handlePostRequest(body: any): MyData {
-    // Example processing logic for a POST request
-    return {
-        id: 2,
-        name: `You sent: ${body.name}`,
-    };
+interface Topic {
+    title: string;
+    slug: string;
+    optech_url: string;
+    categories: string[];
+    aliases: string[];
+    excerpt: string;
 }
 
+export let topics: Topic[] = [];
+
+export async function getTopics(): Promise<Topic[]> {
+    const url = process.env.BTICOIN_TOPICS_URL ?? '';
+
+    const response = await fetch(url);
+    const data = await response.json();
+
+    topics = data;
+
+    return data;
+}
+
+export function getTopic(title: string): Topic | undefined {
+    return topics.find(topic => topic.title.includes(title) || topic.slug.includes(title) || topic.aliases?.includes(title));
+}   

@@ -23,5 +23,5 @@ export async function getTopics(): Promise<Topic[]> {
 }
 
 export function getTopic(title: string): Topic | undefined {
-    return topics.find(topic => topic.title === title || topic.slug === title || topic.aliases?.includes(title));
+    return topics.find(topic => topic.title.includes(title) || topic.slug.includes(title) || topic.aliases?.includes(title));
 }   

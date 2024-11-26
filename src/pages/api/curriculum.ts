@@ -3,7 +3,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { topics, getTopic, getTopics } from '@/lib/curriculumLogic';
 import { client } from '@/config/elasticsearch';
-import { generateCompletion } from '@/lib/openai';
+import { generateCurriculum, getAITopic } from '@/lib/openai';
 
 type ResponseData = {
     data: unknown;
@@ -63,8 +63,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
                 // get the topic title from the query
                 const topicTitle = req.query.topic as string;
 
+                const aiTopic = await getAITopic(topicTitle);
+
                 // get the topic from the topics array
-                const topic = getTopic(topicTitle);
+                const topic = getTopic(aiTopic?.topic ?? topicTitle);
 
                 if (!topic) {
                     // if the topic is not found, return a 404 error
@@ -103,8 +105,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
                 const sourcesWithTitleAndSummaryArray1 = sourcesWithTitleAndSummary.slice(0, Math.floor(sourcesLength / 2));
                 const sourcesWithTitleAndSummaryArray2 = sourcesWithTitleAndSummary.slice(Math.floor(sourcesLength / 2), sourcesLength);
 
-                const completion1 = await generateCompletion(sourcesWithTitleAndSummaryArray1);
-                const completion2 = await generateCompletion(sourcesWithTitleAndSummaryArray2);
+                const completion1 = await generateCurriculum(sourcesWithTitleAndSummaryArray1);
+                const completion2 = await generateCurriculum(sourcesWithTitleAndSummaryArray2);
 
                 let combinedCompletion: any[] = [];
 

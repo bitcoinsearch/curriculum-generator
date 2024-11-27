@@ -41,7 +41,7 @@ let baseQuery = {
     size, // Number of search results to return
     from, // Offset for pagination (calculated from page number)
     _source: {
-        includes: ["title", "summary", "authors", "domain", "tags"],
+        includes: ["title", "summary", "authors", "domain", "tags", "url"],
     },
 };
 
@@ -53,7 +53,7 @@ function buildQuery(title: string, aliases: string[]): typeof baseQuery {
             fields: FIELDS_TO_SEARCH,
             query: alias,
             fuzziness: 0,
-            minimum_should_match: "90%"
+            minimum_should_match: "100%"
         }
     }));
 
@@ -69,7 +69,7 @@ function buildQuery(title: string, aliases: string[]): typeof baseQuery {
                             query: title,
                             fields: FIELDS_TO_SEARCH,
                             fuzziness: 0,
-                            minimum_should_match: "90%"
+                            minimum_should_match: "100%"
                         }
                     },
                     {
@@ -99,6 +99,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
 
                 const aiTopic = await getAITopic(topicTitle);
 
+                console.log("AI TOPICS ===", aiTopic)
+
                 // get the topic from the topics array
                 const topic = getTopic(aiTopic?.topic ?? topicTitle);
 
@@ -123,6 +125,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
 
                 // return only the sources property
                 const sources = resultData.map((item: any) => item._source);
+
+                console.log("SOURCES ===", sources)
 
                 // select only the sources that has a summary property          
                 const sourcesWithSummary = sources.filter((item: any) => item.summary);

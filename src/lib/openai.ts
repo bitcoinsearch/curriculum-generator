@@ -54,7 +54,7 @@ export async function getAITopic(search: string): Promise<Topic | null> {
 export async function generateCurriculum(data: any[]): Promise<any[]> {
     try {
 
-        const prompt = `Using the following JSON data, categorize the topics into four levels of complexity: Introduction, Simple, Medium, and Hard, to create a structured Bitcoin SegWit curriculum. Use the summary field in the JSON to understand the content and assign appropriate difficulty levels, loop through each topic and assign a level.
+        const prompt = `Using the following JSON data, categorize the topics into five levels of complexity: Concepts, Benefits, Technical Aspects, Security Considerations, and Hard, to create a structured Bitcoin curriculum. Use the summary field in the JSON to understand the content and assign appropriate difficulty levels, loop through each topic and assign a level.
         Here is the JSON data: ${JSON.stringify(data)}
         Categorize each topic into one of the four levels:
 

@@ -99,8 +99,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
 
                 const aiTopic = await getAITopic(topicTitle);
 
-                console.log("AI TOPICS ===", aiTopic)
-
                 // get the topic from the topics array
                 const topic = getTopic(aiTopic?.topic ?? topicTitle);
 
@@ -125,8 +123,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
 
                 // return only the sources property
                 const sources = resultData.map((item: any) => item._source);
-
-                console.log("SOURCES ===", sources)
 
                 // select only the sources that has a summary property          
                 const sourcesWithSummary = sources.filter((item: any) => item.summary);

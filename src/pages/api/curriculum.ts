@@ -133,6 +133,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
                 const sourcesWithTitleAndSummary = sourcesWithSummary.map((item: any) => ({
                     title: item.title,
                     summary: item.summary,
+                    url: item.url,
                 }));
 
                 // divide the sources into 2 different arrays using the sourcesLength
@@ -154,6 +155,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
                     combinedCompletion = [...combinedCompletion, ...completion2];
                 }
 
+
+                // add the urls to the combinedCompletion
+                combinedCompletion = combinedCompletion.map((item: any) => ({
+                    ...item,
+                    url: sourcesWithSummary.find((source: any) => source.title === item.title)?.url,
+                }));
 
                 return res.status(200).json({
                     message: 'Success',

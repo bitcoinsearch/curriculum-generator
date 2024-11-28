@@ -54,7 +54,7 @@ export async function getAITopic(search: string): Promise<Topic | null> {
 export async function generateCurriculum(data: any[]): Promise<any[]> {
     try {
 
-        const prompt = `Using the following JSON data, categorize the topics into five levels of complexity: Concepts, Benefits, Technical Aspects, Security Considerations, and Hard, to create a structured Bitcoin curriculum. Use the summary field in the JSON to understand the content and assign appropriate difficulty levels, loop through each topic and assign a level.
+        const prompt = `Using the following JSON data, categorize the Bitcoin topics into five levels of complexity: Concepts, Benefits, Technical Aspects, Security Considerations, and Hard, to create a structured Bitcoin curriculum. Use the summary field in the JSON to understand the content and assign appropriate difficulty levels, loop through each topic and assign a level.
         Here is the JSON data: ${JSON.stringify(data)}
         Categorize each topic into one of the four levels:
 
@@ -64,7 +64,7 @@ export async function generateCurriculum(data: any[]): Promise<any[]> {
           - Technical Aspects: Topics that explain the technical aspects of a new concept or idea.
           - Security considerations: Topics that explain the security considerations of a new concept or idea.
 
-          Provide a brief explanation for why each topic belongs to its assigned level.  Provide the output in JSON format with the fields: topic, category, and reason, Do not include any explanations or markdown formatting, only return valid JSON.
+          Provide a brief explanation for why each topic belongs to its assigned level.  Provide the output in JSON format with the fields: title, category, and reason, Do not include any explanations or markdown formatting, only return valid JSON.
         `;
         // Call OpenAI API to create a completion
         const response = await openai.chat.completions.create({

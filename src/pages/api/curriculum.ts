@@ -35,6 +35,21 @@ let baseQuery = {
                         "type.keyword": "combined-summary",
                     },
                 },
+                {
+                    "match": {
+                        "title": "Lightning"
+                    }
+                },
+                {
+                    "match": {
+                        "body": "Lightning"
+                    }
+                },
+                {
+                    "match": {
+                        "summary": "Lightning"
+                    }
+                },
             ],
         },
     },

@@ -10,13 +10,13 @@ type ResponseData = {
     message: string;
 };
 
-const size = 40;
+const size = 100;
 const from = 0;
 
-const FIELDS_TO_SEARCH = ["title", "summary"];
+const FIELDS_TO_SEARCH = ["title", "summary", "body"];
 
 
-let baseQuery = {
+let baseQuery: any = {
     query: {
         bool: {
             must: [
@@ -37,17 +37,12 @@ let baseQuery = {
                 },
                 {
                     "match": {
-                        "title": "Lightning"
+                        "type": "answer"
                     }
                 },
                 {
                     "match": {
-                        "body": "Lightning"
-                    }
-                },
-                {
-                    "match": {
-                        "summary": "Lightning"
+                        "type": "reply"
                     }
                 },
             ],
@@ -61,7 +56,7 @@ let baseQuery = {
 };
 
 
-function buildQuery(title: string, aliases: string[]): typeof baseQuery {
+function buildQuery(title: string, aliases: string[], topicCategory: string): typeof baseQuery {
     // create a should multi_match for each alias, using the FIELDS_TO_SEARCH
     const shouldMatch = aliases.map((alias) => ({
         multi_match: {
@@ -71,6 +66,49 @@ function buildQuery(title: string, aliases: string[]): typeof baseQuery {
             minimum_should_match: "100%"
         }
     }));
+
+    if (topicCategory === "lightning") {
+        const mustNot = [
+            {
+                "match": {
+                    "title": "Bitcoin"
+                }
+            },
+            {
+                "match": {
+                    "body": "Bitcoin"
+                }
+            },
+            {
+                "match": {
+                    "summary": "Bitcoin"
+                }
+            },
+        ]
+
+        baseQuery.query.bool.must_not.push(...mustNot);
+
+    } else if (topicCategory === "bitcoin") {
+        const mustNot = [
+            {
+                "match": {
+                    "title": "Lightning"
+                }
+            },
+            {
+                "match": {
+                    "body": "Lightning"
+                }
+            },
+            {
+                "match": {
+                    "summary": "Lightning"
+                }
+            },
+        ]
+
+        baseQuery.query.bool.must_not.push(...mustNot);
+    }
 
     return {
         ...baseQuery,
@@ -112,6 +150,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
                 // get the topic title from the query
                 const topicTitle = req.query.topic as string;
 
+                let topicCategory = req.query.category as string;
+
+                topicCategory = topicCategory.toLocaleLowerCase()
+
+
                 const aiTopic = await getAITopic(topicTitle);
 
                 // get the topic from the topics array
@@ -126,7 +169,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
                 }
 
                 // build the query
-                const query = buildQuery(topic.title, topic.aliases ?? aiTopic?.aliases ?? []);
+                const query = buildQuery(topic.title, topic.aliases ?? aiTopic?.aliases ?? [], topicCategory);
 
                 // Call the search method
                 const result = await client.search({
@@ -148,7 +191,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
                 const sourcesWithTitleAndSummary = sourcesWithSummary.map((item: any) => ({
                     title: item.title,
                     summary: item.summary,
-                    url: item.url,
+                    url: item.url
                 }));
 
                 // divide the sources into 2 different arrays using the sourcesLength
